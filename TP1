@@ -1,0 +1,23 @@
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+# ENSAE - 2A - Séminaire de modélisation statistique              #
+# Juin 2016                                                       #
+# Etudiants : François TOULE, Ulrich Mpeli                        #
+# Enseignant : Arthur CHARPENTIER                                 #
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+# == Préambule ====================================================
+rm(list=ls())
+cat("\014")
+
+library(tm)
+library(utils)
+library(SnowballC)
+library(ggplot2)
+library(wordcloud)
+
+# == Get Data ===========================================
+
+download.file(url="http://freakonometrics.free.fr/base_ensae_1.RData",destfile="base.RData")
+load("base.RData")
+
+pricing = read.csv2("http://freakonometrics.free.fr/pricing.csv")
