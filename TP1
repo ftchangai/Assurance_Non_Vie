@@ -421,18 +421,18 @@ wordcloud(nvar$var, nvar$freq, min.freq=0,random.order=TRUE, random.color=TRUE, 
 
 # == Echantillonnage (Apprentissage - Test) ===========================================
 
-set.seed(42)
+set.seed(0)
 data10 = data5[,c(-5)]
-data10$Group21[data10$Group2 == "L"] = "LOPT"
+data10$Group21[data10$Group2 == "L"] = "LOPTU"
 data10$Group21[data10$Group2 == "M"] = "M"
 data10$Group21[data10$Group2 == "N"] = "NQ"
-data10$Group21[data10$Group2 == "O"] = "LOPT"
-data10$Group21[data10$Group2 == "P"] = "LOPT"
+data10$Group21[data10$Group2 == "O"] = "LOPTU"
+data10$Group21[data10$Group2 == "P"] = "LOPTU"
 data10$Group21[data10$Group2 == "Q"] = "NQ"
 data10$Group21[data10$Group2 == "R"] = "R"
 data10$Group21[data10$Group2 == "S"] = "S"
-data10$Group21[data10$Group2 == "T"] = "LOPT"
-data10$Group21[data10$Group2 == "U"] = "U"
+data10$Group21[data10$Group2 == "T"] = "LOPTU"
+data10$Group21[data10$Group2 == "U"] = "LOPTU"
 data10$Group21 = as.factor(data10$Group21)
 
 # Génération d'un vecteur aléatoire
@@ -447,11 +447,24 @@ apprentissage = subset(data10, (alea>=quantile(alea,0.2)))
 ## Régression logistique
 
 #on effectue la régression avec toutes les variables
-reg = glm (Surv1 ~offset(log(Exppdays))+CBonus+CAge+CGroup1+Occupation+CPoldur+Type+Group21+CValue+Category+Adind, data =data10 , family = binomial (link ="logit"))
+reg = glm (Surv1 ~offset(log(Exppdays))+CBonus+CAge+CGroup1+Occupation+CPoldur+Type+Group21+CValue+Category+Adind, data =apprentissage , family = binomial (link ="logit"))
 
 #on prend le critère BIC pour savoir lesquels
 selection = stepAIC(reg, k=log(nrow(data10)))
 
+summary(selection)
+pred1 = predict(selection,newdata=apprentissage, type="response")
+pred2 = predict(selection,newdata=test, type="response")
+pred3 = prediction(pred1,apprentissage$Surv1)
+pred4 = prediction(pred2,test$Surv1)
+performance(pred3,"auc")
+plot(performance(pred3,"tpr","fpr"), main="ROC sur base d'apprentissage", col="green")
+abline(a=0,b=1, col="blue")
+text(0.35, 0.6,  "AUC = 76,28 %", cex=1.65, pos=3,col="red")
+performance(pred4,"auc")
+plot(performance(pred4,"tpr","fpr"), main="ROC sur base test", col="green")
+abline(a=0,b=1, col="blue")
+text(0.35, 0.6,  "AUC = 75,30 %", cex=1.65, pos=3,col="red")
 
 ## Random Forest
 
