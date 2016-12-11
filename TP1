@@ -466,6 +466,58 @@ plot(performance(pred4,"tpr","fpr"), main="ROC sur base test", col="green")
 abline(a=0,b=1, col="blue")
 text(0.35, 0.6,  "AUC = 75,30 %", cex=1.65, pos=3,col="red")
 
+
+
+
+#=========================prévision abec la base pricing
+previ=pricing
+
+#Aucun doublon
+table(duplicated(previ))
+
+
+#on change les modalités
+previ$CAge = cut(previ$Age, breaks = c(18, 29, 47,75), include.lowest = TRUE)
+previ$CBonus = cut(previ$Bonus, breaks = c(-50, -36, -16, 14, 64,150), include.lowest = TRUE)
+previ$CGroup1 = cut(previ$Group1, breaks = c(1, 9, 15, 20), include.lowest = TRUE)
+previ$CPoldur = cut(previ$Poldur, breaks = c(0, 0.5, 4,15) , include.lowest = TRUE)
+previ$CValue = cut(previ$Value, breaks = c(1000, 12999,49996) , include.lowest = TRUE)
+
+
+#on transforme density en numéric
+previ$Density=as.numeric(as.character(previ$Density))
+previ$CDensity = cut(previ$Density, breaks = c(0,77.99,162.99,237.99,297.40) , include.lowest = TRUE)
+table(previ$CDensity)/nrow(previ)
+
+
+previ$Group21[previ$Group2 == "L"] = "LOPTU"
+previ$Group21[previ$Group2 == "M"] = "M"
+previ$Group21[previ$Group2 == "N"] = "NQ"
+previ$Group21[previ$Group2 == "O"] = "LOPTU"
+previ$Group21[previ$Group2 == "P"] = "LOPTU"
+previ$Group21[previ$Group2 == "Q"] = "NQ"
+previ$Group21[previ$Group2 == "R"] = "R"
+previ$Group21[previ$Group2 == "S"] = "S"
+previ$Group21[previ$Group2 == "T"] = "LOPTU"
+previ$Group21[previ$Group2 == "U"] = "LOPTU"
+previ$Group21 = as.factor(previ$Group21)
+
+#on rajoute l'exposition
+previ$Exppdays=rep(365,nrow(previ))
+
+
+
+predPricing = predict(selection,newdata=previ, type="response")
+base_previ=cbind.data.frame(previ$PolNum,predPricing)
+names(base_previ)=c("PolNum", "Proba1")
+
+write.csv(base_previ, file = "prevision.csv")
+
+
+
+
+
+
 ## Random Forest
 
 cl = makeCluster(4)
